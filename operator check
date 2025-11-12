@@ -1,0 +1,53 @@
+//Write a C program to simulate lexical analyzer for validating operators.
+#include <stdio.h>
+#include <string.h>
+/**
+* @brief Checks if a given token is a valid C operator.
+* @param token The input string to check.
+* @return 1 (true) if it's an operator, 0 (false) otherwise.
+*/
+int isOperator(const char* token) {
+// A comprehensive list of C operators
+const char* operators[] = {
+// Arithmetic
+"+", "-", "*", "/", "%", "++", "--",
+// Relational
+"==", "!=", ">", "<", ">=", "<=",
+// Logical
+"&&", "||", "!",
+// Bitwise
+"&", "|", "^", "~", "<<", ">>",
+// Assignment
+"=", "+=", "-=", "*=", "/=", "%=",
+"&=", "|=", "^=", "<<=", ">>=",
+// Member/Pointer
+".", "->",
+// Other
+"?", ":", ",", ";",
+// sizeof (often treated as operator)
+// "sizeof", // Uncomment if you want to include it
+// Sentinel to mark the end of the array
+NULL
+};
+// Loop through the list and compare
+for (int i = 0; operators[i] != NULL; i++) {
+if (strcmp(token, operators[i]) == 0) {
+return 1; // Found a match
+}
+}
+// No match found
+return 0;
+}
+6
+int main() {
+char token[20]; // Buffer to hold the input token
+printf("Enter a token to check if it's an operator: ");
+// Read a single "word" from the user
+scanf("%19s", token);
+if (isOperator(token)) {
+printf("\nResult: '%s' is a valid operator.\n", token);
+} else {
+printf("\nResult: '%s' is NOT a valid operator.\n", token);
+}
+return 0;
+}
