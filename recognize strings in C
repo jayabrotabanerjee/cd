@@ -1,0 +1,41 @@
+//Write a C program to recognize strings under 'a', 'a*b+', 'abb'.
+#include <stdio.h>
+#include <string.h>
+// Function to check for 'a*b+'
+int is_a_star_b_plus(const char* str) {
+int i = 0;
+int len = strlen(str);
+// 1. Consume zero or more 'a's (a*)
+while (str[i] == 'a') {
+i++;
+}
+// 2. Check for at least one 'b' (b+)
+if (str[i] != 'b') {
+return 0; // Failed: Must have at least one 'b'
+}
+// 3. Consume all following 'b's
+while (str[i] == 'b') {
+i++;
+}
+// 4. Check if we are at the end of the string
+// If i == len, all characters were matched
+return (i == len);
+}
+int main() {
+char str[100];
+printf("Enter a string to test: ");
+scanf("%s", str);
+if (strcmp(str, "a") == 0) {
+printf("String matches 'a'\n");
+}
+else if (strcmp(str, "abb") == 0) {
+printf("String matches 'abb'\n");
+}
+else if (is_a_star_b_plus(str)) {
+printf("String matches 'a*b+'\n");
+}
+else {
+printf("String does not match 'a', 'abb', or 'a*b+'\n");
+}
+return 0;
+}
