@@ -1,0 +1,28 @@
+2. Write a C program that takes a C source file as input and removes all comments (//
+and /*...*/) and extra whitespaces.
+
+/* remove_comments_ws.c */
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+int main(int argc,char **argv){
+    if(argc<2){ printf("Usage: %s file.c\n", argv[0]); return 1; }
+    FILE *f=fopen(argv[1],"r"); if(!f){ perror("fopen"); return 1; }
+    int c, d;
+    int last_was_space=0;
+    while((c=fgetc(f))!=EOF){
+        if(c=='/'){
+            d=fgetc(f);
+            if(d=='/'){ while((c=fgetc(f))!=EOF && c!='\n'); if(c==EOF) break; putchar('\n'); last_was_space=0; continue; }
+            else if(d=='*'){ int prev=0; while((c=fgetc(f))!=EOF){ if(prev=='*' && c=='/') break; prev=c; } continue; }
+            else { ungetc(d, f); putchar('/'); last_was_space=0; continue; }
+        }
+        if(isspace(c)){
+            if(!last_was_space){ putchar(' '); last_was_space=1; }
+            if(c=='\n'){ putchar('\n'); last_was_space=0; }
+        } else { putchar(c); last_was_space=0; }
+    }
+    fclose(f);
+    return 0;
+}

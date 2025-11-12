@@ -1,0 +1,43 @@
+1. Write a C program to read a source code file and count the number of keywords, identifiers, operators, numbers, and special symbols.
+Hint: Use isalpha(), isdigit(), and string comparison with keyword list.
+Keyword list: printf, scanf, int, float, char, for, while, if, else, break
+
+/* count_tokens.c */
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+const char *keywords[] = {"printf","scanf","int","float","char","for","while","if","else","break", NULL};
+
+int is_keyword(const char *w){
+    for(int i=0; keywords[i]; ++i) if(strcmp(w, keywords[i])==0) return 1;
+    return 0;
+}
+
+int main(int argc, char **argv){
+    if(argc<2){ printf("Usage: %s source.c\n", argv[0]); return 1; }
+    FILE *f = fopen(argv[1],"r"); if(!f){ perror("fopen"); return 1; }
+    int c;
+    char token[256]; int ti=0;
+    long kw=0,id=0,op=0,num=0,sp=0;
+    while((c=fgetc(f))!=EOF){
+        if(isalpha(c) || c=='_'){ token[ti++]=c;
+            while((c=fgetc(f))!=EOF && (isalnum(c)||c=='_')) token[ti++]=c;
+            token[ti]=0; ti=0;
+            if(is_keyword(token)) kw++; else id++;
+            if(c==EOF) break;
+        }
+        if(isdigit(c)){
+            token[ti++]=c;
+            while((c=fgetc(f))!=EOF && (isdigit(c)||c=='.')) token[ti++]=c;
+            token[ti]=0; ti=0; num++;
+            if(c==EOF) break;
+        }
+        /* detect simple operators and special symbols */
+        if(strchr("+-*/%=!<>&|^~", c)) { op++; continue; }
+        if(strchr("{}[]();,.:?#", c)) { sp++; continue; }
+    }
+    fclose(f);
+    printf("Keywords: %ld\nIdentifiers: %ld\nOperators: %ld\nNumbers: %ld\nSpecial symbols: %ld\n", kw,id,op,num,sp);
+    return 0;
+}

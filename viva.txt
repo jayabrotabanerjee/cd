@@ -1,0 +1,247 @@
+🧠 Section 1 — Basic Concepts
+1️⃣ What is a compiler?
+
+A compiler is a program that translates source code written in a high-level language into machine code or an intermediate code that a computer can execute.
+
+2️⃣ What are the phases of a compiler?
+
+The main phases are:
+
+Lexical Analysis
+
+Syntax Analysis (Parsing)
+
+Semantic Analysis
+
+Intermediate Code Generation
+
+Code Optimization
+
+Code Generation
+
+Symbol Table Management and Error Handling (throughout)
+
+3️⃣ What is the function of the lexical analyzer?
+
+It reads the source code character by character.
+
+Groups characters into meaningful sequences called tokens.
+
+Removes comments and whitespace.
+
+Reports lexical errors (like invalid identifiers or unclosed strings).
+
+Passes tokens to the syntax analyzer (parser).
+
+4️⃣ What is a token?
+
+A token is the smallest meaningful unit in a program, such as:
+
+Keyword (e.g. int, while)
+
+Identifier (e.g. count, sum)
+
+Operator (e.g. +, ==)
+
+Constant (e.g. 10, 'a')
+
+Special symbol (e.g. {, ;)
+
+5️⃣ What is a lexeme?
+
+The lexeme is the actual text in the source code that matches a token pattern.
+👉 Example:
+For token type = identifier, lexeme = "total_sum".
+
+6️⃣ What are patterns and regular expressions?
+
+A pattern describes the form that lexemes of a token can take.
+
+Regular expressions define these patterns.
+Example:
+Identifier → letter (letter | digit)*
+
+7️⃣ What is the role of a symbol table?
+
+A symbol table stores information about identifiers — names, data types, scopes, memory locations, etc.
+
+🧩 Section 2 — Questions from the Assignment Programs
+8️⃣ How did you detect keywords in your program?
+
+I stored all keywords in an array.
+
+For each token, I compared it with each keyword using strcmp().
+
+If matched → counted as a keyword; else → identifier.
+
+9️⃣ How did you differentiate identifiers and constants?
+
+Identifiers: start with a letter or underscore and can contain letters, digits, underscores.
+
+Constants: all digits (for integers) or digits with a single dot (for floats).
+
+🔟 How did you identify operators?
+
+Checked each character or two-character sequence against known operator sets:
+
+Arithmetic: + - * / %
+
+Relational: < > <= >= == !=
+
+Logical: && || !
+
+11️⃣ How did you remove comments?
+
+If // found → skip till newline.
+
+If /* found → skip until */.
+
+Used character-by-character scanning.
+
+12️⃣ How did you count tokens?
+
+Each keyword, identifier, operator, constant, or symbol incremented a counter.
+
+Ignored whitespaces.
+
+13️⃣ What is the difference between a token and a lexeme?
+
+Token: category name (like keyword, identifier).
+
+Lexeme: actual text (like "int", "main").
+
+14️⃣ How did you check for valid identifiers?
+
+Verified first character is a letter or underscore.
+
+Rest are alphanumeric or underscore.
+
+Not a keyword.
+
+15️⃣ How did you detect lexical errors?
+
+Invalid identifiers (starting with digit).
+
+Unclosed strings or comments.
+
+Unknown symbols.
+
+Reported line number for each error.
+
+16️⃣ What is the difference between ‘=’ and ‘==’?
+
+= is an assignment operator.
+
+== is a relational operator used to compare values.
+
+17️⃣ What are special symbols in C?
+
+Characters with special syntactic meaning:
+{ } [ ] ( ) ; , : # " '
+
+18️⃣ What is the difference between character and string constants?
+
+Character constant: enclosed in single quotes, e.g., 'a'
+
+String constant: enclosed in double quotes, e.g., "hello"
+
+19️⃣ What is a comment, and does the compiler process it?
+
+Comments are ignored by the compiler.
+
+Single-line: // ...
+
+Multi-line: /* ... */
+
+20️⃣ What are preprocessor directives?
+
+Commands beginning with #, handled before compilation.
+Examples:
+#include, #define, #ifdef, #ifndef
+
+⚙️ Section 3 — Output/Execution Questions
+21️⃣ What output do you get if the file has int a=10;?
+
+Keywords: 1 (int)
+
+Identifiers: 1 (a)
+
+Operators: 1 (=)
+
+Constants: 1 (10)
+
+Special symbols: 1 (;)
+
+22️⃣ How does your program treat whitespace?
+
+Whitespace (space, tab, newline) separates tokens but is otherwise ignored.
+
+23️⃣ How did you count total lines?
+
+Incremented line counter whenever '\n' encountered.
+
+24️⃣ How did you detect unclosed string constants?
+
+When " is found, the code searches for matching ".
+If not found before newline or EOF → report error.
+
+25️⃣ What are lexical errors examples?
+
+Invalid token (like 9abc)
+
+Unterminated string or comment
+
+Unknown character (like $)
+
+🔬 Section 4 — Theoretical Viva Extensions
+26️⃣ Difference between compiler and interpreter?
+
+Compiler: translates entire code to machine code at once (e.g., C).
+
+Interpreter: translates and executes line by line (e.g., Python).
+
+27️⃣ What is bootstrapping in compilers?
+
+Bootstrapping is the process of writing a compiler in the same language it is supposed to compile.
+
+28️⃣ What is the purpose of intermediate code generation?
+
+To produce a platform-independent representation between source and target code (e.g., three-address code).
+
+29️⃣ What is error handling in the lexical analyzer?
+
+It detects and reports invalid tokens, skipping over them to continue analysis.
+
+30️⃣ Why do we need a symbol table even in lexical analysis?
+
+Because when identifiers are recognized, we store their names for future reference (type checking, code generation, etc.).
+
+🏁 Viva Tip Summary
+
+✅ Focus on explaining:
+
+“How the program works” (flow of logic)
+
+“What each part of compiler does”
+
+“Examples of tokens, errors, outputs”
+
+✅ Be ready to trace one short code snippet:
+Example:
+
+int main() {
+   float x = 3.14;
+   /* comment */
+   printf("Hello");
+}
+
+
+They may ask:
+
+How many tokens?
+
+What are keywords?
+
+What are constants?
+
+What happens to the comment?

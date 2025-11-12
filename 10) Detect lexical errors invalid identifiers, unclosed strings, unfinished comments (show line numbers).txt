@@ -1,0 +1,61 @@
+10. Write a C program that scans a source file and detects lexical errors, such as:
+ Invalid identifiers (1abc)
+ Unclosed string literals ("Hello)
+ Unfinished comments (/* something)
+Display error messages with line numbers.
+
+/* lexical_errors.c */
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+int is_identifier(const char*s){
+    if(!(isalpha(s[0])||s[0]=='_')) return 0;
+    for(int i=1;s[i];++i) if(!(isalnum(s[i])||s[i]=='_')) return 0;
+    return 1;
+}
+
+int main(int argc,char **argv){
+    if(argc<2){ printf("Usage: %s file.c\n", argv[0]); return 1; }
+    FILE *f=fopen(argv[1],"r"); if(!f){ perror("fopen"); return 1; }
+    char line[1024];
+    int lineno=0;
+    int in_comment=0;
+    while(fgets(line,sizeof(line),f)){
+        lineno++;
+        int L=strlen(line);
+        for(int i=0;i<L;i++){
+            if(!in_comment && line[i]=='/' && line[i+1]=='*'){ in_comment=1; i++; continue; }
+            if(in_comment){
+                if(line[i]=='*' && line[i+1]=='/'){ in_comment=0; i++; }
+                continue;
+            }
+            if(line[i]=='"'){
+                int j=i+1; int closed=0;
+                while(1){
+                    if(j>=L){ /* not closed on this line */ 
+                        /* try to read further lines to close - simplified: report error */
+                        printf("Unclosed string starting at line %d\n", lineno); break;
+                    }
+                    if(line[j]=='\\') j+=2;
+                    else if(line[j]=='"'){ closed=1; i=j; break; }
+                    else j++;
+                }
+            }
+            if(isdigit(line[i])){
+                /* check invalid identifier starting with digit */
+                if(i>0 && (isalpha(line[i-1])||line[i-1]=='_')){ /* continuation of identifier? ignore */ }
+            }
+            if(isalpha(line[i])||line[i]=='_'){
+                char tok[256]; int k=0;
+                while(i<L && (isalnum(line[i])||line[i]=='_')) tok[k++]=line[i++];
+                tok[k]=0; i--;
+                if(!is_identifier(tok)) printf("Invalid identifier '%s' at line %d\n", tok, lineno);
+                if(isdigit(tok[0])) printf("Invalid identifier starting with digit '%s' at line %d\n", tok, lineno);
+            }
+        }
+    }
+    if(in_comment) printf("Unterminated comment (/* ... ) detected (EOF)\n");
+    fclose(f);
+    return 0;
+}

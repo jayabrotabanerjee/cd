@@ -1,0 +1,26 @@
+9. Write a C program that checks whether a given string is a valid identifier in C.
+Rules:
+ Must start with a letter or underscore _.
+ Can contain letters, digits, or underscores.
+ Cannot be a keyword.
+Example:
+Input: _count1 → Valid
+Input: 2value → Invalid
+
+/* valid_identifier.c */
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+const char *keywords[]={"int","float","char","return","if","else","for","while",NULL};
+int is_keyword(const char*s){for(int i=0;keywords[i];++i) if(strcmp(s,keywords[i])==0) return 1; return 0;}
+int main(){
+    char s[256];
+    while(scanf("%255s", s)==1){
+        int ok=1;
+        if(!(isalpha(s[0])||s[0]=='_')) ok=0;
+        for(int i=1; s[i]; ++i) if(!(isalnum(s[i])||s[i]=='_')) ok=0;
+        if(is_keyword(s)) ok=0;
+        printf("%s -> %s\n", s, ok? "Valid":"Invalid");
+    }
+    return 0;
+}

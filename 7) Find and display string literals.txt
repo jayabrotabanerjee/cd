@@ -1,0 +1,26 @@
+7. Write a C program to find and display string literals in a given C program source file.
+Example:
+Input: printf("Hello World");
+Output: "Hello World"
+
+/* extract_strings.c */
+#include <stdio.h>
+
+int main(int argc,char **argv){
+    if(argc<2){ printf("Usage: %s file.c\n", argv[0]); return 1; }
+    FILE *f=fopen(argv[1],"r"); if(!f){ perror("fopen"); return 1; }
+    int c;
+    while((c=fgetc(f))!=EOF){
+        if(c=='"'){
+            putchar('"');
+            while((c=fgetc(f))!=EOF){
+                putchar(c);
+                if(c=='"') break;
+                if(c=='\\'){ /* escaped char */ c=fgetc(f); if(c==EOF) break; putchar(c); }
+            }
+            putchar('\n');
+        }
+    }
+    fclose(f);
+    return 0;
+}

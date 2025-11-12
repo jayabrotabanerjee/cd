@@ -1,0 +1,33 @@
+12. Write a C program that scans a C source file and counts how many times each
+keyword (e.g., int, return, if, while, etc.) appears.
+Example Output:
+int : 3
+return : 1
+if : 2
+while : 1
+
+/* keyword_count.c */
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+const char *keywords[] = {"int","return","if","while","for","else","break", NULL};
+
+int main(int argc,char **argv){
+    if(argc<2){ printf("Usage: %s file.c\n", argv[0]); return 1; }
+    int counts[20]={0};
+    FILE *f=fopen(argv[1],"r"); if(!f){ perror("fopen"); return 1; }
+    char tok[256];
+    int c;
+    while((c=fgetc(f))!=EOF){
+        if(isalpha(c)){
+            int i=0; tok[i++]=c;
+            while((c=fgetc(f))!=EOF && isalnum(c)) tok[i++]=c;
+            tok[i]=0; for(int k=0; keywords[k]; ++k) if(strcmp(tok, keywords[k])==0) counts[k]++;
+            if(c==EOF) break; ungetc(c,f);
+        }
+    }
+    for(int k=0; keywords[k]; ++k) printf("%s : %d\n", keywords[k], counts[k]);
+    fclose(f);
+    return 0;
+}

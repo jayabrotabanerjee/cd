@@ -1,0 +1,28 @@
+8. Write a C program that reads a source code file and displays:
+ Total number of lines
+ Total number of tokens
+ Total number of comments
+
+/* stats.c */
+#include <stdio.h>
+#include <ctype.h>
+
+int main(int argc,char **argv){
+    if(argc<2){ printf("Usage: %s file.c\n", argv[0]); return 1; }
+    FILE *f=fopen(argv[1],"r"); if(!f){ perror("fopen"); return 1; }
+    int c, lines=0, tokens=0, comments=0;
+    while((c=fgetc(f))!=EOF){
+        if(c=='\n') lines++;
+        if(isalpha(c) || c=='_'){ tokens++; while((c=fgetc(f))!=EOF && (isalnum(c)||c=='_')); if(c==EOF) break; ungetc(c,f); }
+        else if(isdigit(c)){ tokens++; while((c=fgetc(f))!=EOF && (isdigit(c)||c=='.')); if(c==EOF) break; ungetc(c,f); }
+        else if(c=='/'){
+            int d=fgetc(f);
+            if(d=='/'){ comments++; while((c=fgetc(f))!=EOF && c!='\n'); }
+            else if(d=='*'){ comments++; while((c=fgetc(f))!=EOF){ if(c=='*' && (d=fgetc(f))=='/'){ break; } else ungetc(d, f); } }
+            else { ungetc(d, f); tokens++; }
+        } else if(!isspace(c)) { tokens++; }
+    }
+    fclose(f);
+    printf("Lines: %d\nTokens: %d\nComments: %d\n", lines, tokens, comments);
+    return 0;
+}
