@@ -1,0 +1,45 @@
+//Write a C program to implement Program semantic rules to calculate the expression that takes an expression with digits, + and * and computes the value.
+#include <stdio.h>
+#include <ctype.h>
+#define MAX 100
+int valStack[MAX], topVal = -1;
+char opStack[MAX], topOp = -1;
+void pushVal(int v) { valStack[++topVal] = v; }
+int popVal() { return valStack[topVal--]; }
+void pushOp(char c) { opStack[++topOp] = c; }
+char popOp() { return opStack[topOp--]; }
+char peekOp() { return opStack[topOp]; }
+int precedence(char op) {
+if (op == '+') return 1;
+if (op == '*') return 2;
+return 0;
+}
+void compute() {
+int b = popVal();
+int a = popVal();
+char op = popOp();
+if(op=='+') pushVal(a+b);
+else if(op=='*') pushVal(a*b);
+}
+int main() {
+char expr[MAX];
+printf("Enter expression (digits, +, *, no spaces): ");
+scanf("%s", expr);
+int i=0;
+while(expr[i]!='\0') {
+if(isdigit(expr[i])) {
+pushVal(expr[i]-'0');
+} else if(expr[i]=='+' || expr[i]=='*') {
+while(topOp>=0 && precedence(peekOp()) >= precedence(expr[i])) {
+compute();
+}
+pushOp(expr[i]);
+}
+i++;
+}
+while(topOp>=0) {
+compute();
+}
+printf("Result: %d\n", popVal());
+return 0;
+}
