@@ -1,0 +1,122 @@
+//Write a C program for implementing the functionalities of predictive parser for the mini language specified in Note 1.
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h> // For isalpha()
+// --- Global Variables ---
+char *input; // Pointer to the current position in the input string
+int error; // Flag to stop parsing on error
+// --- Function Prototypes for Non-Terminals ---
+void E();
+void E_prime();
+void T();
+void T_prime();
+void F();
+/**
+*/
+* @brief Matches the current input character with an expected terminal.
+* If it matches, advances the input pointer. If not, sets the error flag.
+void match(char expected) {
+if (error) return; // Don't proceed if an error has already occurred
+if (*input == expected) {
+input++; // Consume the character and advance
+} else {
+printf("Error: Expected '%c', but found '%c'\n", expected, *input);
+error = 1;
+}
+}
+/**
+* @brief Parses the 'F' non-terminal.
+* Rule: F -> ( E ) | id
+*/
+void F() {
+if (error) return;
+if (*input == '(') {
+printf("Applying rule: F -> ( E )\n");
+match('(');
+E(); // Recurse for E
+if (!error) match(')');
+}
+else if (isalpha(*input)) { // 'id' is any alphabet character
+printf("Applying rule: F -> id (found '%c')\n", *input);
+input++; // Consume the 'id'
+}
+else {
+error = 1;
+printf("Error in F: Expected '(' or 'id', but found '%c'\n", *input);
+}
+}
+/**
+*/
+void T_prime() {
+if (error) return;
+* @brief Parses the 'T'' (T-prime) non-terminal.
+* Rule: T' -> * F T' | \epsilon
+if (*input == '*') {
+printf("Applying rule: T' -> * F T'\n");
+match('*');
+F();
+T_prime();
+} else {
+// Epsilon rule (do nothing)
+printf("Applying rule: T' -> \epsilon\n");
+}
+}
+/**
+* @brief Parses the 'T' non-terminal.
+* Rule: T -> F T'
+*/
+void T() {
+if (error) return;
+printf("Applying rule: T -> F T'\n");
+F();
+T_prime();
+}
+/**
+*/
+void E_prime() {
+if (error) return;
+* @brief Parses the 'E'' (E-prime) non-terminal.
+* Rule: E' -> + T E' | \epsilon
+if (*input == '+') {
+printf("Applying rule: E' -> + T E'\n");
+match('+');
+T();
+E_prime();
+} else {
+// Epsilon rule (do nothing)
+printf("Applying rule: E' -> \epsilon\n");
+}
+}
+/**
+* @brief Parses the 'E' non-terminal (the start symbol).
+* Rule: E -> T E'
+*/
+void E() {
+if (error) return;
+printf("Applying rule: E -> T E'\n");
+T();
+E_prime();
+}
+// --- Main Driver Function ---
+int main() {
+char buffer[100];
+printf("Enter an expression (e.g., a+b*c or (a+b)*c ): ");
+scanf("%99s", buffer);
+printf("--------------------------------------\n");
+printf("Parsing string: %s\n\n", buffer);
+input = buffer; // Set the global input pointer
+error = 0; // Clear the error flag
+// Start parsing from the start symbol 'E'
+E();
+printf("\n--------------------------------------\n");
+// Check for success
+// Success means no error occurred AND we consumed the entire string.
+if (error == 0 && *input == '\0') {
+printf("Success: String parsed successfully.\n");
+} else if (error == 0 && *input != '\0') {
+printf("Failure: String parsed, but input remaining: %s\n", input);
+} else {
+printf("Failure: String contains syntax errors.\n");
+}
+return 0;
+}
