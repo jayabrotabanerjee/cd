@@ -1,0 +1,81 @@
+//Write a C program for constructing recursive descent parsing.
+#include <stdio.h>
+#include <ctype.h>
+char *input; // Pointer to input string
+// Function prototypes
+void E();
+void E_prime();
+void T();
+void T_prime();
+void F();
+// Function to match and consume expected character
+void match(char expected) {
+if (*input == expected) {
+input++;
+} else {
+printf("Error: expected '%c' but found '%c'\n", expected, *input);
+exit(1);
+}
+}
+// E -> T E'
+void E() {
+T();
+E_prime();
+}
+// E' -> + T E' | - T E' | ε
+void E_prime() {
+if (*input == '+') {
+match('+');
+T();
+E_prime();
+} else if (*input == '-') {
+match('-');
+T();
+E_prime();
+}
+// else ε (do nothing)
+}
+// T -> F T'
+void T() {
+F();
+T_prime();
+}
+// T' -> * F T' | / F T' | ε
+void T_prime() {
+if (*input == '*') {
+match('*');
+F();
+T_prime();
+} else if (*input == '/') {
+match('/');
+F();
+T_prime();
+}
+// else ε (do nothing)
+}
+// F -> ( E ) | id
+void F() {
+if (*input == '(') {
+match('(');
+E();
+match(')');
+} else if (isdigit(*input)) {
+match(*input); // Consume the digit
+} else {
+printf("Error: unexpected character '%c'\n", *input);
+exit(1);
+}
+}
+int main() {
+char str[100];
+printf("Enter an arithmetic expression: ");
+scanf("%s", str);
+input = str;
+E();
+if (*input == '\0') {
+printf("Parsing successful!\n");
+} else {
+printf("Error: unexpected input remaining '%s'\n", input);
+}
+return 0;
+}
