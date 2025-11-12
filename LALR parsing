@@ -1,0 +1,36 @@
+//Write a C program to implement LALR parsing
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define MAX_STACK 100
+#define MAX_INPUT 100
+typedef struct {
+char action; // 's' = shift, 'r' = reduce, 'a' = accept
+int number;
+} ActionEntry;
+// Precomputed action table (simplified)
+ActionEntry actionTable[12][6]; // states x terminals (+, *, (, ), id, $)
+int gotoTable[12][3]; // states x non-terminals (E, T, F)
+char terminals[] = {'+', '*', '(', ')', 'i', '$'};
+char nonTerminals[] = {'E', 'T', 'F'};
+// Stack for states
+int stack[MAX_STACK];
+int top = 0;
+// Function to get index of symbol
+int symbolIndex(char sym, char arr[], int n) {
+for(int i=0;i<n;i++)
+if(arr[i]==sym) return i;
+return -1;
+}
+// Initialize parsing table (example)
+void initParsingTable() {
+// Set all actions to error first
+for(int i=0;i<12;i++)
+for(int j=0;j<6;j++)
+actionTable[i][j].action = ' ';
+// Simplified table: Only for illustration
+// Fill some shift 's', reduce 'r', accept 'a'
+actionTable[0][symbolIndex('i', terminals,6)] = (ActionEntry){'s',5};
+actionTable[0][symbolIndex('(', terminals,6)] = (ActionEntry){'s',4};
+gotoTable[0][symbolIndex('E',nonTerminals,3)] = 1;
+gotoTable[0][symbolIndex('T']()
