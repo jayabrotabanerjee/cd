@@ -1,0 +1,49 @@
+//Write a C program to implement operator precedence parsing.
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+#define MAX 100
+char stack[MAX];
+int top = -1;
+void push(char c) { stack[++top] = c; }
+char pop() { return stack[top--]; }
+char peek() { return stack[top]; }
+// Operator precedence function
+int precedence(char op) {
+switch(op) {
+case '+': return 1;
+case '*': return 2;
+case '$': return 0;
+default: return -1;
+}
+}
+void operatorPrecedenceParse(char input[]) {
+push('$'); // bottom of stack
+int i = 0;
+char a = input[i];
+while (!(peek() == '$' && a == '$')) {
+if (isdigit(a)) {
+printf("Shift %c\n", a);
+i++;
+a = input[i];
+} else {
+char s = peek();
+if (precedence(s) < precedence(a)) {
+push(a);
+printf("Shift %c\n", a);
+i++;
+a = input[i];
+} else {
+printf("Reduce %c\n", pop());
+}
+}
+}
+printf("Parsing complete.\n");
+}
+int main() {
+char input[MAX];
+printf("Enter expression (digits, +, *, end with $): ");
+scanf("%s", input);
+operatorPrecedenceParse(input);
+return 0;
+}
