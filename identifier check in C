@@ -1,0 +1,37 @@
+//Write a C program to test whether a given identifier is valid or not.
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h> // For isalpha() and isalnum()
+// Returns 1 (true) if valid, 0 (false) if invalid
+int isValidIdentifier(const char* str) {
+// Check length
+if (str == NULL || str[0] == '\0') {
+return 0; // Empty string is not a valid identifier
+}
+// 1. Check the first character
+// Must be a letter (a-z, A-Z) or an underscore (_)
+if (!(isalpha(str[0]) || str[0] == '_')) {
+return 0; // Invalid start
+}
+4
+// 2. Check the rest of the characters
+for (int i = 1; str[i] != '\0'; i++) {
+// Must be a letter, a digit (0-9), or an underscore
+if (!(isalnum(str[i]) || str[i] == '_')) {
+return 0; // Invalid character
+}
+}
+// If we passed all checks, it's valid
+return 1;
+}
+int main() {
+char str[100];
+printf("Enter a string to test as an identifier: ");
+scanf("%s", str);
+if (isValidIdentifier(str)) {
+printf("'%s' is a valid identifier.\n", str);
+} else {
+printf("'%s' is NOT a valid identifier.\n", str);
+}
+return 0;
+}
