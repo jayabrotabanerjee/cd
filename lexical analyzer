@@ -1,0 +1,246 @@
+/*Design a lexical analyzer for given language and the lexical analyzer should ignore
+redundant spaces, tabs and new lines. It should also ignore comments. Although
+the syntax specification states that identifiers can be arbitrarily long, you may
+restrict the length to some reasonable value. Simulate the same in C language.*/
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+// Maximum length for identifiers and lexemes
+#define MAX_LEXEME_LEN 100
+// Maximum length for identifiers (as per prompt)
+#define MAX_IDENTIFIER_LEN 31
+// Enum for all token types
+typedef enum {
+T_EOF = -1,
+T_UNKNOWN,
+T_IDENTIFIER,
+T_KEYWORD,
+T_NUMBER,
+T_OPERATOR,
+T_SPECIAL // ( ) { } ; ,
+} TokenType;
+// --- Global Variables ---
+FILE *fpin;
+int line_no = 1;
+int ch; // Current character (as int to handle EOF)
+char lexeme[MAX_LEXEME_LEN];
+// --- Keyword List ---
+const char *keywords[] = {
+"int", "void", "char", "float", "double", "long", "short",
+"if", "else", "switch", "case", "default",
+"for", "while", "do", "break", "continue",
+"return", "struct", "typedef", "enum", "const", "static",
+NULL // End of list marker
+};
+// --- Helper Functions ---
+/**
+*/
+* @brief Converts a token type enum to a printable string.
+const char* tokenToString(TokenType token) {
+switch (token) {
+case T_EOF: return "EOF";
+case T_IDENTIFIER: return "IDENTIFIER";
+case T_KEYWORD: return "KEYWORD";
+case T_NUMBER: return "NUMBER";
+case T_OPERATOR: return "OPERATOR";
+case T_SPECIAL: return "SPECIAL_SYMBOL";
+case T_UNKNOWN:
+default: return "UNKNOWN";
+}
+}
+/**
+*/
+* @brief Checks if a given string is a keyword.
+* @return 1 if it's a keyword, 0 otherwise.
+int isKeyword(const char *str) {
+for (int i = 0; keywords[i] != NULL; i++) {
+if (strcmp(str, keywords[i]) == 0) {
+return 1;
+}
+}
+return 0;
+}
+/**
+* @brief Skips all whitespace characters.
+*/
+void skipWhitespace() {
+while (isspace(ch)) {
+if (ch == '\n') {
+line_no++;
+}
+ch = fgetc(fpin);
+}
+}
+/**
+* @brief Skips comments (both single and multi-line).
+* @return 1 if a comment was skipped, 0 otherwise.
+*/
+int skipComments() {
+if (ch == '/') {
+int next_ch = fgetc(fpin);
+// 1. Single-line comment (//)
+if (next_ch == '/') {
+while ((ch = fgetc(fpin)) != '\n' && ch != EOF);
+if (ch == '\n') line_no++;
+ch = fgetc(fpin); // Consume the next char
+return 1; // Skipped a comment
+}
+// 2. Multi-line comment (/* ... */)
+else if (next_ch == '*') {
+while ((ch = fgetc(fpin)) != EOF) {
+if (ch == '*') {
+next_ch = fgetc(fpin);
+if (next_ch == '/') {
+break; // End of comment
+} else {
+ungetc(next_ch, fpin); // Not end, put it back
+}
+} else if (ch == '\n') {
+line_no++;
+}
+}
+if (ch == EOF) {
+printf("Error: Unterminated multi-line comment.\n");
+}
+ch = fgetc(fpin); // Consume char after '*/'
+return 1; // Skipped a comment
+}
+// Not a comment, just a '/'
+else {
+ungetc(next_ch, fpin); // Put back the char
+return 0; // Not a comment
+}
+}
+return 0; // Not a comment
+}
+/**
+* @brief Core function to get the next token from the input stream.
+*/
+TokenType getNextToken() {
+int i = 0;
+lexeme[0] = '\0'; // Clear lexeme buffer
+// --- 1. Cleanup Phase (Whitespace & Comments) ---
+// Loop until we find a non-whitespace/non-comment char
+while (1) {
+skipWhitespace();
+if (skipComments()) {
+continue; // Go back to skipping whitespace
+}
+break; // Found start of a token
+}
+// --- 2. Token Identification Phase ---
+// Check for EOF
+if (ch == EOF) {
+return T_EOF;
+}
+// Check for Identifier or Keyword
+if (isalpha(ch) || ch == '_') {
+do {
+if (i < MAX_LEXEME_LEN - 1) {
+lexeme[i++] = ch;
+}
+ch = fgetc(fpin);
+} while (isalnum(ch) || ch == '_');
+lexeme[i] = '\0';
+ungetc(ch, fpin); // Put back the non-alphanum char
+// Restrict identifier length (as per prompt)
+if (strlen(lexeme) > MAX_IDENTIFIER_LEN) {
+printf("<Line %d> Warning: Identifier '%s' truncated to %d chars.\n",
+line_no, lexeme, MAX_IDENTIFIER_LEN);
+lexeme[MAX_IDENTIFIER_LEN] = '\0';
+}
+if (isKeyword(lexeme)) {
+return T_KEYWORD;
+} else {
+return T_IDENTIFIER;
+}
+}
+// Check for Number (Integer)
+if (isdigit(ch)) {
+do {
+if (i < MAX_LEXEME_LEN - 1) {
+lexeme[i++] = ch;
+}
+ch = fgetc(fpin);
+} while (isdigit(ch));
+lexeme[i] = '\0';
+ungetc(ch, fpin); // Put back the non-digit char
+return T_NUMBER;
+}
+// Check for Operators and Special Symbols
+lexeme[i++] = ch;
+int next_ch = fgetc(fpin);
+// Check for 2-character operators
+if (ch == '=' && next_ch == '=') { // ==
+lexeme[i++] = next_ch;
+} else if (ch == '!' && next_ch == '=') { // !=
+lexeme[i++] = next_ch;
+} else if (ch == '<' && next_ch == '=') { // <=
+lexeme[i++] = next_ch;
+} else if (ch == '>' && next_ch == '=') { // >=
+lexeme[i++] = next_ch;
+} else if (ch == '+' && next_ch == '+') { // ++
+lexeme[i++] = next_ch;
+} else if (ch == '-' && next_ch == '-') { // --
+lexeme[i++] = next_ch;
+} else if (ch == '+' && next_ch == '=') { // +=
+lexeme[i++] = next_ch;
+} else if (ch == '-' && next_ch == '=') { // -=
+lexeme[i++] = next_ch;
+} else if (ch == '*' && next_ch == '=') { // *=
+lexeme[i++] = next_ch;
+} else if (ch == '/' && next_ch == '=') { // /=
+lexeme[i++] = next_ch;
+} else if (ch == '&' && next_ch == '&') { // &&
+lexeme[i++] = next_ch;
+} else if (ch == '|' && next_ch == '|') { // ||
+lexeme[i++] = next_ch;
+} else if (ch == '-' && next_ch == '>') { // ->
+lexeme[i++] = next_ch;
+}
+// Handle single-char cases
+else {
+ungetc(next_ch, fpin); // It was just a 1-char token
+}
+lexeme[i] = '\0';
+ch = fgetc(fpin); // Consume next char for the *next* token
+// Categorize as OPERATOR or SPECIAL
+if (strcmp(lexeme, "(") == 0 || strcmp(lexeme, ")") == 0 ||
+strcmp(lexeme, "{") == 0 || strcmp(lexeme, "}") == 0 ||
+strcmp(lexeme, "[") == 0 || strcmp(lexeme, "]") == 0 ||
+strcmp(lexeme, ";") == 0 || strcmp(lexeme, ",") == 0) {
+return T_SPECIAL;
+}
+// All other punctuation is an operator
+else if (ispunct(lexeme[0])) {
+return T_OPERATOR;
+}
+// Fallback
+return T_UNKNOWN;
+}
+// --- Main Function ---
+int main() {
+fpin = fopen("input.txt", "r");
+if (fpin == NULL) {
+printf("Error: Could not open file 'input.txt'\n");
+return 1;
+}
+printf("--- Lexical Analyzer Start --- \n\n");
+printf("%-10s %-20s %-20s\n", "Line", "Token Type", "Lexeme");
+printf("--------------------------------------------------\n");
+// Get first character
+ch = fgetc(fpin);
+TokenType token;
+while ((token = getNextToken()) != T_EOF) {
+printf("%-10d %-20s %-20s\n",
+line_no,
+tokenToString(token),
+lexeme);
+}
+printf("--------------------------------------------------\n");
+printf("\n--- Lexical Analysis Complete --- \n");
+3
+fclose(fpin);
+return 0;
+}
