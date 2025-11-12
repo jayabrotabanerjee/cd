@@ -1,0 +1,49 @@
+#include <stdio.h>
+#include <string.h>
+int main() {
+char line[256];
+printf("Enter a line: ");
+fgets(line, sizeof(line), stdin);
+// Remove trailing newline character from fgets
+line[strcspn(line, "\n")] = 0;
+int len = strlen(line);
+// Trim leading whitespace
+int start = 0;
+while (line[start] == ' ' || line[start] == '\t') {
+start++;
+}
+}
+// Check for single-line comment
+if (line[start] == '/' && line[start + 1] == '/') {
+printf("The line is a single-line comment.\n");
+// Check for multi-line comment (simplified: assumes it's on one line)
+else if (line[start] == '/' && line[start + 1] == '*') {
+// Find the end of the comment
+int end = -1;
+for (int i = start + 2; i < len - 1; i++) {
+if (line[i] == '*' && line[i + 1] == '/') {
+end = i + 1;
+break;
+}
+}
+if (end != -1) {
+// Check if there's anything after the comment ends
+int after = end + 1;
+while(line[after] == ' ' || line[after] == '\t') {
+after++;
+}
+if (line[after] == '\0') {
+printf("The line is a multi-line comment.\n");
+} else {
+printf("The line contains a multi-line comment, but is not only a
+comment.\n");
+}
+} else {
+printf("The line starts a multi-line comment but does not end it.\n");
+}
+}
+else {
+printf("The line is not a comment.\n");
+}
+return 0;
+}
